@@ -1655,8 +1655,40 @@
     renderLibrary();
   };
 
+  /** Bir seferlik: 30 Ekim 2026 Cuma 09:00–11:00 çalışma kaydı (tarayıcı başına). */
+  function applyOneTimeManualSessionImport() {
+    const FLAG = 'studyTracker_import_fri_20261030_v1';
+    if (storage.get(FLAG)) return;
+
+    const dateKey = '2026-10-30';
+    const manualSession = {
+      id: 'manual-fri-20261030-0900',
+      startTime: '09:00',
+      endTime: '11:00',
+      durationMinutes: 120
+    };
+
+    const existing = historyArchive[dateKey];
+    const sessions = existing?.sessions ? existing.sessions.map(s => ({ ...s })) : [];
+    const duplicate = sessions.some(
+      session =>
+        session.startTime === manualSession.startTime &&
+        session.endTime === manualSession.endTime &&
+        session.durationMinutes === manualSession.durationMinutes
+    );
+
+    if (!duplicate) {
+      sessions.push(manualSession);
+      archiveDay(dateKey, sessions);
+      saveState();
+    }
+
+    storage.set(FLAG, '1');
+  }
+
   loadSettings();
   loadState();
+  applyOneTimeManualSessionImport();
   repairCountdownState();
   syncTimerModeUi();
   renderAll();
