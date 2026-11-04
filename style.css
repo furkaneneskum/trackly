@@ -699,8 +699,7 @@ input {
   gap: 0.35rem;
 }
 
-.countdown-duration,
-.break-duration {
+.countdown-duration {
   font-size: 1rem;
   font-weight: 500;
   width: 3.25rem;
@@ -718,25 +717,20 @@ input {
 }
 
 .countdown-duration::-webkit-outer-spin-button,
-.countdown-duration::-webkit-inner-spin-button,
-.break-duration::-webkit-outer-spin-button,
-.break-duration::-webkit-inner-spin-button {
+.countdown-duration::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.countdown-duration:focus,
-.break-duration:focus {
+.countdown-duration:focus {
   border-bottom-color: var(--accent);
 }
 
-.countdown-duration:disabled,
-.break-duration:disabled {
+.countdown-duration:disabled {
   opacity: 0.55;
 }
 
-.countdown-unit,
-.break-unit {
+.countdown-unit {
   font-size: 0.85rem;
   color: var(--text-2);
 }
@@ -887,72 +881,17 @@ input {
   max-width: 640px;
 }
 
-.break-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--text);
+.btn-break {
+  min-width: 160px;
 }
 
-.break-duration-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+.btn-break.is-running {
+  border-color: rgba(245, 158, 11, 0.7);
+  background: rgba(245, 158, 11, 0.1);
 }
 
-.break-duration-wrap[hidden] {
-  display: none;
-}
-
-.break-mode {
-  display: inline-flex;
-  gap: 0.2rem;
-  padding: 0.15rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  background: var(--surface-inset);
-}
-
-.break-mode-btn {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--text-2);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  padding: 0.3rem 0.75rem;
-  min-height: 30px;
-  cursor: pointer;
-  transition: color var(--transition), border-color var(--transition), background var(--transition);
-}
-
-.break-mode-btn:hover:not(:disabled):not(.is-active) {
-  color: var(--text);
-}
-
-.break-mode-btn.is-active {
-  color: var(--text);
-  font-weight: 600;
-  background: #18181b;
-  border-color: var(--accent-border);
-}
-
-.break-mode-btn:disabled {
-  cursor: not-allowed;
-}
-
-.break-mode-btn:disabled:not(.is-active) {
-  opacity: 0.5;
-}
-
-.break-mode-btn:focus-visible {
-  outline: 2px solid var(--accent-border);
-  outline-offset: 2px;
-}
-
-.break-duration {
-  width: 2.5rem;
+.btn-break.is-running:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.18);
 }
 
 /* Chart */
@@ -1546,30 +1485,8 @@ input {
     text-align: center;
   }
 
-  .break-controls {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-  }
-
-  .break-label {
-    justify-self: end;
-    align-self: center;
-  }
-
-  .break-mode {
-    justify-self: start;
-  }
-
-  .break-duration-wrap {
-    grid-column: 1 / -1;
-    justify-self: center;
-  }
-
-  .btn-break,
-  .btn-break-cancel {
+  .btn-break {
     width: 100%;
-    min-width: 0;
   }
 
   .ambient-player {

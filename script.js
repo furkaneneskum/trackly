@@ -57,12 +57,7 @@
     countdownHours: document.getElementById('countdownHours'),
     countdownMinutes: document.getElementById('countdownMinutes'),
     tagInput: document.getElementById('tagInput'),
-    breakDuration: document.getElementById('breakDuration'),
-    breakDurationWrap: document.getElementById('breakDurationWrap'),
-    breakModeTimed: document.getElementById('breakModeTimed'),
-    breakModeOpen: document.getElementById('breakModeOpen'),
     btnBreakStart: document.getElementById('btnBreakStart'),
-    btnBreakCancel: document.getElementById('btnBreakCancel'),
     sessionCount: document.getElementById('sessionCount'),
     toast: document.getElementById('toast'),
     toastMsg: document.getElementById('toastMsg'),
@@ -93,7 +88,6 @@
   };
 
   let saveInProgress = false;
-  let breakMode = 'timed';
 
   function clampCountdownInputs() {
     const hours = Math.min(23, Math.max(0, Math.round(Number(els.countdownHours.value) || 0)));
@@ -209,9 +203,6 @@
       } else if (parsed.timerMode === 'chrono') {
         state.timerMode = 'chrono';
       }
-      if (parsed.breakMode === 'open' || parsed.breakMode === 'timed') {
-        breakMode = parsed.breakMode;
-      }
     } catch {
       /* ignore */
     }
@@ -222,8 +213,7 @@
     storage.set(SETTINGS_KEY, JSON.stringify({
       timerMode: state.timerMode,
       countdownHours: hours,
-      countdownMinutes: minutes,
-      breakMode
+      countdownMinutes: minutes
     }));
   }
 
@@ -1317,12 +1307,9 @@
     els.countdownHours.disabled = breakRunning || anyTimerRunning;
     els.countdownMinutes.disabled = breakRunning || anyTimerRunning;
 
-    els.btnBreakStart.disabled = breakRunning || anyTimerRunning;
-    els.btnBreakCancel.disabled = !breakRunning;
-    els.breakDuration.disabled = breakRunning;
-    els.breakModeTimed.disabled = breakRunning;
-    els.breakModeOpen.disabled = breakRunning;
-    syncBreakModeUi();
+    els.btnBreakStart.disabled = !breakRunning && anyTimerRunning;
+    els.btnBreakStart.textContent = breakRunning ? 'Molayı Bitir' : 'Mola Başlat';
+    els.btnBreakStart.classList.toggle('is-running', breakRunning);
   }
 
   function tick() {
@@ -1538,12 +1525,6 @@
     }
   }
 
-  function getBreakDurationMinutes() {
-    const value = Number(els.breakDuration.value);
-    if (!Number.isFinite(value)) return 0;
-    return Math.min(120, Math.max(1, Math.round(value)));
-  }
-
   function saveBreakSession(startDate, endDate, plannedMinutes) {
     const elapsedMinutes = Math.max(1, Math.round((endDate - startDate) / 60000));
     const durationMinutes = Number.isFinite(plannedMinutes)
@@ -1584,42 +1565,28 @@
   function handleBreakStart() {
     if (isBreakRunning()) return;
 
-    const openBreak = breakMode === 'open';
-    const plannedMinutes = openBreak ? null : getBreakDurationMinutes();
-    if (!openBreak && plannedMinutes < 1) return;
-
     if (state.active.runningSince || state.countdown.runningSince) {
       handleStop();
     }
 
     const now = new Date();
-    state.breakActive = openBreak
-      ? {
-          open: true,
-          startTime: formatClock(now),
-          startedAt: now.getTime(),
-          plannedMinutes: null,
-          endsAt: null
-        }
-      : {
-          startTime: formatClock(now),
-          startedAt: now.getTime(),
-          plannedMinutes,
-          endsAt: now.getTime() + plannedMinutes * 60000
-        };
+    state.breakActive = {
+      open: true,
+      startTime: formatClock(now),
+      startedAt: now.getTime(),
+      plannedMinutes: null,
+      endsAt: null
+    };
 
-    if (!openBreak) els.breakDuration.value = String(plannedMinutes);
     saveState();
     renderAll();
     startTicking();
   }
 
-  function handleBreakCancel() {
+  function handleBreakEnd() {
     if (!isBreakRunning()) return;
 
-    const openBreak = isOpenBreak();
-    const elapsedMs = getBreakElapsedMs();
-    if (elapsedMs >= 60000) {
+    if (getBreakElapsedMs() >= 60000) {
       finishBreak(false);
       showUndoToast('Mola kaydedildi');
       undoBuffer = null;
@@ -1630,31 +1597,16 @@
     saveState();
     renderAll();
     stopTicking();
+    showUndoToast('Mola 1 dakikadan kısa, kaydedilmedi');
+    undoBuffer = null;
+  }
 
-    if (openBreak) {
-      showUndoToast('Mola 1 dakikadan kısa, kaydedilmedi');
-      undoBuffer = null;
+  function handleBreakToggle() {
+    if (isBreakRunning()) {
+      handleBreakEnd();
+    } else {
+      handleBreakStart();
     }
-  }
-
-  function syncBreakModeUi() {
-    const running = isBreakRunning();
-    const openBreak = running ? isOpenBreak() : breakMode === 'open';
-
-    els.breakModeTimed.classList.toggle('is-active', !openBreak);
-    els.breakModeOpen.classList.toggle('is-active', openBreak);
-    els.breakModeTimed.setAttribute('aria-pressed', openBreak ? 'false' : 'true');
-    els.breakModeOpen.setAttribute('aria-pressed', openBreak ? 'true' : 'false');
-    els.breakDurationWrap.hidden = openBreak;
-    els.btnBreakCancel.textContent = openBreak ? 'Bitir' : 'İptal';
-  }
-
-  function setBreakMode(mode) {
-    if (mode !== 'timed' && mode !== 'open') return;
-    if (isBreakRunning() || breakMode === mode) return;
-    breakMode = mode;
-    saveSettings();
-    syncBreakModeUi();
   }
 
   function renderAll() {
@@ -1685,10 +1637,7 @@
   els.modeCountdown.addEventListener('click', () => setTimerMode('countdown'));
   els.countdownHours.addEventListener('change', applyCountdownDurationInput);
   els.countdownMinutes.addEventListener('change', applyCountdownDurationInput);
-  els.btnBreakStart.addEventListener('click', handleBreakStart);
-  els.btnBreakCancel.addEventListener('click', handleBreakCancel);
-  els.breakModeTimed.addEventListener('click', () => setBreakMode('timed'));
-  els.breakModeOpen.addEventListener('click', () => setBreakMode('open'));
+  els.btnBreakStart.addEventListener('click', handleBreakToggle);
   els.toastUndo.addEventListener('click', undoDelete);
 
   const archiveJumpBtn = document.getElementById('btnArchiveJump');
