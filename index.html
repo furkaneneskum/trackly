@@ -3,20 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0f">
+  <meta name="theme-color" content="#0b0b0d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
   <title>Çalışma Takipçisi</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app">
     <header class="header">
-      <h1 class="logo">Study Tracker</h1>
+      <h1 class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="currentColor"/>
+          <path d="M12 6.5V12h5" fill="none" stroke="#0b0b0d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Study Tracker</span>
+      </h1>
       <p class="daily-total" id="dailyTotal">Bugün Toplam: 0 Saat 0 Dakika</p>
     </header>
 
@@ -39,6 +45,14 @@
       </div>
 
       <section class="panel panel-center" aria-label="Çalışma motoru">
+        <button class="archive-jump" id="btnArchiveJump" type="button" aria-label="Arşive git" title="Arşiv Kütüphanesi">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3.5" y="5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M3.5 9.5h17M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M7.5 13h2M11 13h2M14.5 13h2M7.5 16.5h2M11 16.5h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+
         <div class="timer-mode" role="tablist" aria-label="Zamanlayıcı modu">
           <button class="timer-mode-btn is-active" id="modeChrono" type="button" role="tab" aria-selected="true">Kronometre</button>
           <button class="timer-mode-btn" id="modeCountdown" type="button" role="tab" aria-selected="false">Geri sayım</button>
@@ -81,6 +95,8 @@
             <button class="btn btn-start" id="btnStart" type="button">Başlat</button>
             <button class="btn btn-stop" id="btnStop" type="button" disabled>Durdur</button>
             <button class="btn btn-reset" id="btnReset" type="button">Sıfırla</button>
+          </div>
+          <div class="controls-save">
             <button class="btn btn-save" id="btnSave" type="button" disabled>Çalışmayı Kaydet</button>
           </div>
           <input
@@ -109,8 +125,8 @@
             >
             <span class="break-unit">dk</span>
           </div>
-          <button class="btn btn-break" id="btnBreakStart" type="button">MOLA BAŞLAT</button>
-          <button class="btn btn-break-cancel" id="btnBreakCancel" type="button" disabled>İPTAL</button>
+          <button class="btn btn-break" id="btnBreakStart" type="button">Mola Başlat</button>
+          <button class="btn btn-break-cancel" id="btnBreakCancel" type="button" disabled>İptal</button>
         </div>
       </section>
 
@@ -123,7 +139,7 @@
       </aside>
     </main>
 
-    <section class="library-panel panel" aria-label="Geçmiş günler arşivi">
+    <section class="library-panel panel" id="libraryPanel" aria-label="Geçmiş günler arşivi">
       <div class="library-header">
         <div>
           <h2 class="panel-title library-title">Arşiv Kütüphanesi</h2>

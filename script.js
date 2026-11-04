@@ -3,6 +3,9 @@
 
   const STORAGE_KEY = 'studyTrackerData';
   const SETTINGS_KEY = 'calismaTakipcisi_settings';
+  const CHART_COLOR_DAY = '#2563eb';
+  const CHART_COLOR_TODAY = '#2fbf8f';
+  const CHART_FONT = "'Inter', system-ui, sans-serif";
 
   const WEEKDAY_CHART = [
     { id: 'mon', short: 'Pzt', label: 'Pazartesi' },
@@ -869,11 +872,15 @@
     return `${hours} sa ${mins} dk`;
   }
 
+  function setTimerText(ms) {
+    els.timer.textContent = formatDuration(ms).replace(/:/g, ' : ');
+  }
+
   function renderTimer() {
     syncTimerModeUi();
 
     if (isBreakRunning()) {
-      els.timer.textContent = formatDuration(getBreakRemainingMs());
+      setTimerText(getBreakRemainingMs());
       els.timer.classList.remove('running');
       els.timer.classList.add('break-mode');
       els.timerWrapper.classList.add('break-active');
@@ -884,13 +891,12 @@
     els.timer.classList.remove('break-mode');
 
     if (isCountdownMode()) {
-      els.timer.textContent = formatDuration(getCountdownRemainingMs());
+      setTimerText(getCountdownRemainingMs());
       els.timer.classList.toggle('running', !!state.countdown.runningSince);
       return;
     }
 
-    const ms = getCurrentElapsedMs();
-    els.timer.textContent = formatDuration(ms);
+    setTimerText(getCurrentElapsedMs());
     els.timer.classList.toggle('running', !!state.active.runningSince);
   }
 
@@ -1157,7 +1163,7 @@
       const li = document.createElement('li');
       li.className = day.isToday ? 'is-today' : '';
       li.innerHTML =
-        `<span class="dot" style="background:${day.isToday ? '#00d4ff' : '#a855f7'}"></span>` +
+        `<span class="dot" style="background:${day.isToday ? CHART_COLOR_TODAY : CHART_COLOR_DAY}"></span>` +
         `<span>${day.label}</span>` +
         `<span class="legend-value">${formatWeeklyMinutesLabel(day.minutes)}</span>`;
       els.chartLegend.appendChild(li);
@@ -1180,8 +1186,8 @@
       chart = null;
     }
 
-    const barColors = weekData.map(day => (day.isToday ? '#00d4ff' : 'rgba(168, 85, 247, 0.75)'));
-    const borderColors = weekData.map(day => (day.isToday ? '#00d4ff' : '#a855f7'));
+    const barColors = weekData.map(day => (day.isToday ? CHART_COLOR_TODAY : CHART_COLOR_DAY));
+    const borderColors = barColors;
 
     if (chart) {
       chart.data.labels = labels;
@@ -1199,9 +1205,9 @@
             data: values,
             backgroundColor: barColors,
             borderColor: borderColors,
-            borderWidth: 1,
-            borderRadius: 4,
-            maxBarThickness: 42
+            borderWidth: 0,
+            borderRadius: 2,
+            maxBarThickness: 20
           }]
         },
         options: {
@@ -1210,13 +1216,13 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: '#16161f',
-              borderColor: 'rgba(0, 212, 255, 0.3)',
+              backgroundColor: '#1b1b1f',
+              borderColor: '#2c2c32',
               borderWidth: 1,
-              titleFont: { family: "'Fira Code', monospace", size: 11 },
-              bodyFont: { family: "'Fira Code', monospace", size: 11 },
-              titleColor: '#e8e8f0',
-              bodyColor: '#7a7a8c',
+              titleFont: { family: CHART_FONT, size: 12, weight: '600' },
+              bodyFont: { family: CHART_FONT, size: 12 },
+              titleColor: '#f4f4f5',
+              bodyColor: '#a1a1aa',
               padding: 12,
               callbacks: {
                 title(items) {
@@ -1234,23 +1240,26 @@
           scales: {
             x: {
               grid: { display: false },
+              border: { color: '#2c2c32' },
               ticks: {
-                color: '#7a7a8c',
-                font: { family: "'Fira Code', monospace", size: 10 }
+                color: '#d4d4d8',
+                font: { family: CHART_FONT, size: 11 }
               }
             },
             y: {
               beginAtZero: true,
               suggestedMax: hasData ? undefined : 60,
+              border: { display: false },
               ticks: {
-                color: '#7a7a8c',
-                font: { family: "'Fira Code', monospace", size: 10 },
+                color: '#d4d4d8',
+                font: { family: CHART_FONT, size: 11 },
+                padding: 6,
                 callback(value) {
                   return `${value} dk`;
                 }
               },
               grid: {
-                color: 'rgba(0, 212, 255, 0.08)'
+                color: '#232328'
               }
             }
           },
@@ -1619,6 +1628,14 @@
   els.btnBreakStart.addEventListener('click', handleBreakStart);
   els.btnBreakCancel.addEventListener('click', handleBreakCancel);
   els.toastUndo.addEventListener('click', undoDelete);
+
+  const archiveJumpBtn = document.getElementById('btnArchiveJump');
+  const libraryPanel = document.getElementById('libraryPanel');
+  if (archiveJumpBtn && libraryPanel) {
+    archiveJumpBtn.addEventListener('click', () => {
+      libraryPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 
   els.tagInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !els.btnStart.disabled) {
