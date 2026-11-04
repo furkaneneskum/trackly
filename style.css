@@ -901,6 +901,56 @@ input {
   gap: 0.4rem;
 }
 
+.break-duration-wrap[hidden] {
+  display: none;
+}
+
+.break-mode {
+  display: inline-flex;
+  gap: 0.2rem;
+  padding: 0.15rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-inset);
+}
+
+.break-mode-btn {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  min-height: 30px;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.break-mode-btn:hover:not(:disabled):not(.is-active) {
+  color: var(--text);
+}
+
+.break-mode-btn.is-active {
+  color: var(--text);
+  font-weight: 600;
+  background: #18181b;
+  border-color: var(--accent-border);
+}
+
+.break-mode-btn:disabled {
+  cursor: not-allowed;
+}
+
+.break-mode-btn:disabled:not(.is-active) {
+  opacity: 0.5;
+}
+
+.break-mode-btn:focus-visible {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
 .break-duration {
   width: 2.5rem;
 }
@@ -1507,8 +1557,13 @@ input {
     align-self: center;
   }
 
-  .break-duration-wrap {
+  .break-mode {
     justify-self: start;
+  }
+
+  .break-duration-wrap {
+    grid-column: 1 / -1;
+    justify-self: center;
   }
 
   .btn-break,
