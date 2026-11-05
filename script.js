@@ -2235,7 +2235,13 @@
     if (!preserveScroll) {
       const todaySection = scrollEl.querySelector('.goals-day.is-today');
       if (todaySection) {
-        todaySection.scrollIntoView({ block: 'nearest' });
+        const sectionTop = todaySection.offsetTop - scrollEl.offsetTop;
+        const sectionBottom = sectionTop + todaySection.offsetHeight;
+        if (sectionTop < scrollEl.scrollTop) {
+          scrollEl.scrollTop = sectionTop;
+        } else if (sectionBottom > scrollEl.scrollTop + scrollEl.clientHeight) {
+          scrollEl.scrollTop = sectionBottom - scrollEl.clientHeight;
+        }
       }
     }
   }
