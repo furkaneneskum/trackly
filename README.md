@@ -1,93 +1,93 @@
-# Trackly — Focus & Study Tracker
+# Trackly — Odak ve Çalışma Takipçisi
 
-> Track your focus. Build the habit.
+> Odaklan, takip et, alışkanlık kazan.
 
-Trackly is a minimal, distraction-free study tracker that runs entirely in the browser. Time your sessions with a stopwatch or countdown, take breaks, plan goals for every day of the week, and watch your progress build up in a weekly chart. Past days are archived automatically.
+Trackly, tamamen tarayıcıda çalışan sade ve dikkat dağıtmayan bir çalışma takipçisidir. Çalışmalarını kronometre veya geri sayımla tutabilir, mola verebilir, haftanın her günü için hedef belirleyebilir ve ilerlemeni haftalık grafikte görebilirsin. Geçmiş günler otomatik olarak arşivlenir.
 
-**Live demo:** [furkaneneskum.github.io/trackly](https://furkaneneskum.github.io/trackly/)
+**Canlı demo:** [furkaneneskum.github.io/trackly](https://furkaneneskum.github.io/trackly/)
 
-![Trackly dashboard](docs/screenshots/dashboard.png)
+![Trackly ana ekran](docs/screenshots/dashboard.png)
 
 ---
 
-## Features
+## Özellikler
 
-### Stopwatch and countdown
+### Kronometre ve geri sayım
 
-Switch between a **stopwatch** for open-ended sessions and a **countdown** with a custom duration (hours and minutes). Label a session with what you are studying (for example *Calculus*), then save it to today's log with one click. A short tone plays when a countdown finishes.
+Süresiz çalışmalar için **kronometre**, belirli bir süre için ise saat ve dakika ayarlanabilen **geri sayım** modu vardır. Ne çalıştığını yazabilir (örneğin *Matematik*) ve tek tıkla çalışmayı günün kayıtlarına ekleyebilirsin. Geri sayım bittiğinde kısa bir uyarı sesi çalar.
 
 <p align="center">
-  <img src="docs/screenshots/countdown.png" alt="Countdown mode" width="620">
+  <img src="docs/screenshots/countdown.png" alt="Geri sayım modu" width="620">
 </p>
 
-### One-tap breaks
+### Tek tuşla mola
 
-Breaks are a single button: **Mola Başlat** (Start Break) starts a break that counts up. The timer turns amber, and the same button becomes **Molayı Bitir** (End Break). Breaks longer than a minute are saved to the log, separately from study time, so they never inflate your totals.
+Mola tek bir butondan yönetilir: **Mola Başlat**'a basınca ileri sayan bir mola başlar, sayaç turuncuya döner ve aynı buton **Molayı Bitir** olur. Bir dakikadan uzun molalar kayıtlara eklenir. Molalar çalışma süresinden ayrı tutulduğu için toplam çalışma süreni şişirmez.
 
 <p align="center">
-  <img src="docs/screenshots/break.png" alt="Break in progress" width="620">
+  <img src="docs/screenshots/break.png" alt="Devam eden mola" width="620">
 </p>
 
-### Weekly goals planner
+### Haftalık hedef planlayıcı
 
-Plan goals for each day from Monday to Sunday. Every day is a collapsible panel showing its progress (for example *1/3 done*). Today opens automatically. You can add, check off and delete goals inside each day.
+Pazartesiden pazara her gün için ayrı hedefler belirleyebilirsin. Her gün açılıp kapanan bir panel olarak görünür ve ilerlemesini gösterir (örneğin *1/3 tamam*). Bugünün paneli otomatik açılır. Her günün içinde hedef ekleyebilir, tamamlandı olarak işaretleyebilir veya silebilirsin.
 
-### Weekly progress chart
+### Haftalık ilerleme grafiği
 
-A bar chart (built with Chart.js) shows how many minutes you studied on each day of the current week. Today is highlighted, and a breakdown by day is listed below the chart.
+Chart.js ile hazırlanan çubuk grafik, bu hafta her gün kaç dakika çalıştığını gösterir. Bugün ayrı renkle vurgulanır, grafiğin altında da günlere göre toplam süreler listelenir.
 
 <p align="center">
-  <img src="docs/screenshots/weekly-goals.png" alt="Weekly goals planner" height="440">
+  <img src="docs/screenshots/weekly-goals.png" alt="Haftalık hedef planlayıcı" height="440">
   &nbsp;&nbsp;
-  <img src="docs/screenshots/weekly-chart.png" alt="Weekly progress chart" height="440">
+  <img src="docs/screenshots/weekly-chart.png" alt="Haftalık ilerleme grafiği" height="440">
 </p>
 
-### Archive library
+### Arşiv kütüphanesi
 
-At midnight, each day is moved into the archive with its sessions, breaks and goals. Every archived day appears as a card with totals for study time, sessions, breaks and goal completion. You can delete a day and undo the deletion from the toast notification.
+Gün değiştiğinde o günün çalışmaları, molaları ve hedefleri arşive taşınır. Her arşiv günü; toplam çalışma süresi, oturum sayısı, molalar ve tamamlanan hedeflerle birlikte bir kart olarak görünür. Bir günü silebilir, yanlışlıkla sildiysen çıkan bildirimden geri alabilirsin.
 
-![Archive library](docs/screenshots/archive.png)
+![Arşiv kütüphanesi](docs/screenshots/archive.png)
 
-### Focus sounds
+### Odak sesleri
 
-A small floating player offers ambient sounds (light rain, heavy rain, fireplace, lo-fi) with a volume slider to help you get into flow.
+Ekranın köşesindeki küçük oynatıcıda odaklanmana yardımcı olacak ortam sesleri bulunur: hafif yağmur, sağanak yağmur, şömine ve lo-fi müzik. Ses seviyesi ayarlanabilir.
 
-### Responsive design
+### Her ekrana uyumlu tasarım
 
-Trackly uses a three-column layout on desktop, a stacked two-column layout on tablets and a single column on phones, with no horizontal scrolling.
+Trackly masaüstünde üç sütun, tablette iki sütun, telefonda ise tek sütun halinde görünür. Hiçbir ekranda yatay kaydırma olmaz.
 
 <p align="center">
-  <img src="docs/screenshots/mobile.png" alt="Mobile layout" width="280">
+  <img src="docs/screenshots/mobile.png" alt="Mobil görünüm" width="280">
 </p>
 
 ---
 
-## Tech stack
+## Kullanılan teknolojiler
 
-| Layer | Technology |
-|-------|------------|
-| Markup | Semantic HTML5 with ARIA roles and labels |
-| Styling | Plain CSS (custom properties, Grid and Flexbox, media queries), Inter font |
-| Logic | Vanilla JavaScript (ES2020+), no framework and no build step |
-| Charts | [Chart.js 4](https://www.chartjs.org/) via CDN |
-| Storage | Browser `localStorage` |
-| Hosting | GitHub Pages |
+| Katman | Teknoloji |
+|--------|-----------|
+| Yapı | Anlamsal HTML5, ARIA etiketleriyle erişilebilirlik |
+| Tasarım | Saf CSS (CSS değişkenleri, Grid ve Flexbox, medya sorguları), Inter yazı tipi |
+| Mantık | Saf JavaScript (ES2020+), framework ve derleme adımı yok |
+| Grafik | CDN üzerinden [Chart.js 4](https://www.chartjs.org/) |
+| Veri saklama | Tarayıcının `localStorage` alanı |
+| Yayın | GitHub Pages |
 
-## How it works
+## Nasıl çalışır?
 
-- **No backend and no account.** All data stays in your browser's `localStorage`, so nothing leaves your device.
-- **Survives reloads.** Timer state is saved continuously, so a running stopwatch, countdown or break is restored after a page refresh and keeps accurate time while the tab is in the background.
-- **Automatic day rollover.** When the date changes, today's sessions and goals are archived and a fresh day begins.
-- **Storage keys:**
-  - `studyTrackerData`: today's sessions, the active timer state and the archive
-  - `studyTracker_goals_YYYY-MM-DD`: goals for a given date
-  - `calismaTakipcisi_settings`: timer mode and countdown duration
+- **Sunucu ve hesap gerekmez.** Tüm veriler tarayıcının `localStorage` alanında saklanır, hiçbir bilgi cihazından dışarı çıkmaz.
+- **Sayfa yenilense de kaybolmaz.** Sayaç durumu sürekli kaydedilir. Çalışan kronometre, geri sayım veya mola sayfa yenilendiğinde kaldığı yerden devam eder; sekme arka plandayken de doğru süreyi tutar.
+- **Otomatik gün geçişi.** Tarih değiştiğinde günün kayıtları ve hedefleri arşive taşınır, yeni gün boş başlar.
+- **Kayıt anahtarları:**
+  - `studyTrackerData`: günün kayıtları, çalışan sayacın durumu ve arşiv
+  - `studyTracker_goals_YYYY-AA-GG`: belirli bir günün hedefleri
+  - `calismaTakipcisi_settings`: sayaç modu ve geri sayım süresi
 
-> Clearing your browser's site data erases your history. Data is stored per browser and per device.
+> Tarayıcının site verilerini temizlersen geçmişin silinir. Veriler her tarayıcıda ve her cihazda ayrı tutulur.
 
-## Getting started
+## Bilgisayarda çalıştırma
 
-Trackly is a static site, so any local web server works:
+Trackly statik bir site olduğu için herhangi bir yerel web sunucusuyla çalışır:
 
 ```bash
 git clone https://github.com/furkaneneskum/trackly.git
@@ -95,22 +95,18 @@ cd trackly
 python -m http.server 8000
 ```
 
-Then open <http://localhost:8000> in your browser.
+Ardından tarayıcıda <http://localhost:8000> adresini aç.
 
-## Project structure
+## Proje yapısı
 
 ```
-├── index.html          # Layout and markup
-├── style.css           # Design system and responsive styles
-├── script.js           # Timer, breaks, goals, chart, archive and sound player
-├── audio/              # Ambient focus sounds
-└── docs/screenshots/   # Images used in this README
+├── index.html          # Sayfa yapısı
+├── style.css           # Tasarım ve ekran uyumluluğu
+├── script.js           # Sayaç, mola, hedefler, grafik, arşiv ve ses oynatıcı
+├── audio/              # Odak sesleri
+└── docs/screenshots/   # Bu README'deki ekran görüntüleri
 ```
-
-## Note on language
-
-The interface is currently in Turkish. For example, *Kronometre* means Stopwatch, *Geri sayım* means Countdown, *Haftalık Hedefler* means Weekly Goals and *Arşiv Kütüphanesi* means Archive Library.
 
 ---
 
-Built by **Furkan Enes Kum**.
+Geliştiren: **Furkan Enes Kum**
