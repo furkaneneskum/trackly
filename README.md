@@ -1,12 +1,12 @@
-# Kairos — Focus & Study Tracker
+# Trackly — Focus & Study Tracker
 
-> *Kairos* (καιρός) is the ancient Greek word for "the right moment". Kairos helps you make the most of yours.
+> Track your focus. Build the habit.
 
-Kairos is a minimal, distraction-free study tracker that runs entirely in the browser. Time your sessions with a stopwatch or countdown, take breaks, plan goals for every day of the week, and watch your progress build up in a weekly chart. Past days are archived automatically.
+Trackly is a minimal, distraction-free study tracker that runs entirely in the browser. Time your sessions with a stopwatch or countdown, take breaks, plan goals for every day of the week, and watch your progress build up in a weekly chart. Past days are archived automatically.
 
-**Live demo:** [furkaneneskum.github.io/calisma-takipcisi](https://furkaneneskum.github.io/calisma-takipcisi/)
+**Live demo:** [furkaneneskum.github.io/trackly](https://furkaneneskum.github.io/trackly/)
 
-![Kairos dashboard](docs/screenshots/dashboard.png)
+![Trackly dashboard](docs/screenshots/dashboard.png)
 
 ---
 
@@ -54,7 +54,7 @@ A small floating player offers ambient sounds (light rain, heavy rain, fireplace
 
 ### Responsive design
 
-Kairos uses a three-column layout on desktop, a stacked two-column layout on tablets and a single column on phones, with no horizontal scrolling.
+Trackly uses a three-column layout on desktop, a stacked two-column layout on tablets and a single column on phones, with no horizontal scrolling.
 
 <p align="center">
   <img src="docs/screenshots/mobile.png" alt="Mobile layout" width="280">
@@ -87,11 +87,11 @@ Kairos uses a three-column layout on desktop, a stacked two-column layout on tab
 
 ## Getting started
 
-Kairos is a static site, so any local web server works:
+Trackly is a static site, so any local web server works:
 
 ```bash
-git clone https://github.com/furkaneneskum/calisma-takipcisi.git
-cd calisma-takipcisi
+git clone https://github.com/furkaneneskum/trackly.git
+cd trackly
 python -m http.server 8000
 ```
 
