@@ -618,14 +618,20 @@
             countdown: normalizeCountdown(parsed.countdown, parsed.pomodoro)
           };
         } else {
-          archiveDay(parsed.date, parsed.sessions);
+          archiveDay(parsed.date, [
+            ...(Array.isArray(parsed.sessions) ? parsed.sessions : []),
+            ...buildRolloverSessions(parsed, parsed.date, '')
+          ]);
           state = createFreshState();
         }
       } else if (parsed.date) {
         historyArchive = {};
 
         if (parsed.date !== today) {
-          archiveDay(parsed.date, parsed.sessions);
+          archiveDay(parsed.date, [
+            ...(Array.isArray(parsed.sessions) ? parsed.sessions : []),
+            ...buildRolloverSessions(parsed, parsed.date, '')
+          ]);
           state = createFreshState();
         } else if (parsed.date === today) {
           state = {
@@ -1618,14 +1624,75 @@
     updateButtons();
   }
 
+  function buildRolloverSessions(snapshot, dateKey, label) {
+    const dayStartMs = parseDateKey(dateKey).getTime();
+    const dayEndMs = dayStartMs + 24 * 60 * 60 * 1000;
+    const result = [];
+
+    const pushStudy = (startTime, elapsedMs) => {
+      if (!startTime || elapsedMs < 1000) return;
+      const [h, m] = startTime.split(':').map(Number);
+      const startDate = new Date(dayStartMs);
+      startDate.setHours(h, m, 0, 0);
+      const endDate = new Date(Math.min(startDate.getTime() + elapsedMs, dayEndMs));
+      const session = {
+        id: createSessionId(),
+        startTime,
+        endTime: formatClock(endDate),
+        durationMinutes: Math.max(1, Math.round(elapsedMs / 60000))
+      };
+      if (label) session.label = label;
+      result.push(session);
+    };
+
+    const active = snapshot.active;
+    if (active && active.startTime) {
+      const runningMs = active.runningSince ? Math.max(0, dayEndMs - active.runningSince) : 0;
+      pushStudy(active.startTime, (active.elapsedMs || 0) + runningMs);
+    }
+
+    const countdown = snapshot.countdown;
+    if (countdown && countdown.startTime && Number.isFinite(countdown.totalMs)) {
+      const runningMs = countdown.runningSince ? Math.max(0, dayEndMs - countdown.runningSince) : 0;
+      const remainingMs = Math.max(0, (countdown.remainingMs || 0) - runningMs);
+      pushStudy(countdown.startTime, countdown.totalMs - remainingMs);
+    }
+
+    const breakActive = snapshot.breakActive;
+    if (breakActive && breakActive.startedAt) {
+      const endMs = breakActive.open || !breakActive.endsAt
+        ? dayEndMs
+        : Math.min(breakActive.endsAt, dayEndMs);
+      const elapsedMs = endMs - breakActive.startedAt;
+      if (elapsedMs >= 60000) {
+        result.push({
+          id: createSessionId(),
+          type: 'break',
+          startTime: breakActive.startTime,
+          endTime: formatClock(new Date(endMs)),
+          durationMinutes: Math.max(1, Math.round(elapsedMs / 60000))
+        });
+      }
+    }
+
+    return result;
+  }
+
   function checkDateReset() {
     const today = getTodayKey();
     if (state.date !== today) {
-      archiveDay(state.date, state.sessions);
+      const carried = buildRolloverSessions(state, state.date, buildSessionLabel());
+      archiveDay(state.date, [...state.sessions, ...carried]);
       state = createFreshState();
+      els.tagInput.value = '';
       saveState();
       renderAll();
       stopTicking();
+
+      if (carried.length) {
+        showUndoToast('Gece yarısı süren çalışma önceki güne kaydedildi');
+        undoBuffer = null;
+      }
     }
   }
 
@@ -1683,35 +1750,43 @@
     renderLibrary();
   };
 
-  /** Bir seferlik: 30 Ekim 2026 Cuma 09:00–11:00 çalışma kaydı (tarayıcı başına). */
-  function applyOneTimeManualSessionImport() {
-    const FLAG = 'studyTracker_import_fri_20261030_v1';
-    if (storage.get(FLAG)) return;
-
-    const dateKey = '2026-10-30';
-    const manualSession = {
-      id: 'manual-fri-20261030-0900',
-      startTime: '09:00',
-      endTime: '11:00',
-      durationMinutes: 120
-    };
-
-    const existing = historyArchive[dateKey];
-    const sessions = existing?.sessions ? existing.sessions.map(s => ({ ...s })) : [];
-    const duplicate = sessions.some(
-      session =>
-        session.startTime === manualSession.startTime &&
-        session.endTime === manualSession.endTime &&
-        session.durationMinutes === manualSession.durationMinutes
-    );
-
-    if (!duplicate) {
-      sessions.push(manualSession);
-      archiveDay(dateKey, sessions);
-      saveState();
+  /** Bir seferlik geçmiş kayıtlar (tarayıcı başına bir kez eklenir). */
+  const ONE_TIME_ARCHIVE_IMPORTS = [
+    {
+      flag: 'studyTracker_import_fri_20261030_v1',
+      dateKey: '2026-10-30',
+      session: { id: 'manual-fri-20261030-0900', startTime: '09:00', endTime: '11:00', durationMinutes: 120 }
+    },
+    {
+      flag: 'studyTracker_import_thu_20261105_v1',
+      dateKey: '2026-11-05',
+      session: { id: 'manual-thu-20261105-2300', startTime: '23:00', endTime: '00:00', durationMinutes: 60 }
     }
+  ];
 
-    storage.set(FLAG, '1');
+  function applyOneTimeManualSessionImport() {
+    let changed = false;
+
+    ONE_TIME_ARCHIVE_IMPORTS.forEach(({ flag, dateKey, session }) => {
+      if (storage.get(flag)) return;
+      if (dateKey >= getTodayKey()) return;
+
+      const existing = historyArchive[dateKey];
+      const sessions = existing?.sessions ? existing.sessions.map(s => ({ ...s })) : [];
+      const duplicate = sessions.some(
+        item => isStudySession(item) && item.startTime === session.startTime
+      );
+
+      if (!duplicate) {
+        sessions.push({ ...session });
+        archiveDay(dateKey, sessions);
+        changed = true;
+      }
+
+      storage.set(flag, '1');
+    });
+
+    if (changed) saveState();
   }
 
   loadSettings();
