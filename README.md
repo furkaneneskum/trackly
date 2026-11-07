@@ -28,6 +28,12 @@ Mola tek bir butondan yönetilir: **Mola Başlat**'a basınca ileri sayan bir mo
   <img src="docs/screenshots/break.png" alt="Devam eden mola" width="620">
 </p>
 
+### Elle kayıt ekleme ve düzenleme
+
+Kronometreyi açmayı unuttuysan çalışmanı sonradan ekleyebilirsin. "Bugünün Kayıtları" panelindeki **+ Ekle** butonu bir pencere açar. Burada tarih, başlangıç ve bitiş saati, tür (çalışma veya mola) ve ne çalıştığını girersin; süre otomatik hesaplanır. Gece yarısını geçen kayıtlar da (örneğin 23:30 – 00:45) doğru hesaplanır. Geçmiş bir tarih seçersen kayıt doğrudan o günün arşivine eklenir.
+
+Bugünkü ve arşivdeki her kaydın yanındaki kalem ikonu aynı pencereyi düzenleme modunda açar. Saatleri, türü veya etiketi değiştirebilir ya da kaydı silebilirsin. Silinen kayıt çıkan bildirimden geri alınabilir.
+
 ### Haftalık hedef planlayıcı
 
 Pazartesiden pazara her gün için ayrı hedefler belirleyebilirsin. Her gün açılıp kapanan bir panel olarak görünür ve ilerlemesini gösterir (örneğin *1/3 tamam*). Bugünün paneli otomatik açılır. Her günün içinde hedef ekleyebilir, tamamlandı olarak işaretleyebilir veya silebilirsin.
@@ -44,7 +50,7 @@ Chart.js ile hazırlanan çubuk grafik, bu hafta her gün kaç dakika çalışt�
 
 ### Arşiv kütüphanesi
 
-Gün değiştiğinde o günün çalışmaları, molaları ve hedefleri arşive taşınır. Her arşiv günü; toplam çalışma süresi, oturum sayısı, molalar ve tamamlanan hedeflerle birlikte bir kart olarak görünür. Bir günü silebilir, yanlışlıkla sildiysen çıkan bildirimden geri alabilirsin.
+Gün değiştiğinde o günün çalışmaları, molaları ve hedefleri arşive taşınır. Her arşiv günü; toplam çalışma süresi, oturum sayısı, molalar ve tamamlanan hedeflerle birlikte bir kart olarak görünür. Kartın içinden o güne yeni kayıt ekleyebilir, mevcut kayıtları düzenleyebilirsin. Bir günü silebilir, yanlışlıkla sildiysen çıkan bildirimden geri alabilirsin.
 
 ![Arşiv kütüphanesi](docs/screenshots/archive.png)
 

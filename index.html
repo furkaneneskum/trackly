@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20261107">
+  <link rel="stylesheet" href="style.css?v=20261107b">
 </head>
 <body>
   <div class="app">
@@ -33,7 +33,10 @@
         <aside class="panel panel-left">
           <div class="panel-header">
             <h2 class="panel-title">Bugünün Kayıtları</h2>
-            <span class="session-count" id="sessionCount" hidden></span>
+            <div class="panel-header-actions">
+              <span class="session-count" id="sessionCount" hidden></span>
+              <button class="panel-action-btn" id="btnAddSession" type="button" title="Elle kayıt ekle">+ Ekle</button>
+            </div>
           </div>
           <ul class="session-list" id="sessionList">
             <li class="session-empty">Henüz kayıt yok</li>
@@ -140,6 +143,47 @@
     </section>
   </div>
 
+  <dialog class="session-dialog" id="sessionDialog" aria-labelledby="sessionDialogTitle">
+    <form class="session-form" id="sessionForm" novalidate>
+      <h2 class="session-dialog-title" id="sessionDialogTitle">Yeni kayıt</h2>
+
+      <div class="session-type" role="group" aria-label="Kayıt türü">
+        <button class="session-type-btn is-active" id="sessionTypeStudy" type="button" aria-pressed="true">Çalışma</button>
+        <button class="session-type-btn" id="sessionTypeBreak" type="button" aria-pressed="false">Mola</button>
+      </div>
+
+      <label class="session-field">
+        <span class="session-field-label">Tarih</span>
+        <input class="session-input" id="sessionDate" type="date" required>
+      </label>
+
+      <div class="session-field-row">
+        <label class="session-field">
+          <span class="session-field-label">Başlangıç</span>
+          <input class="session-input" id="sessionStart" type="time" required>
+        </label>
+        <label class="session-field">
+          <span class="session-field-label">Bitiş</span>
+          <input class="session-input" id="sessionEnd" type="time" required>
+        </label>
+      </div>
+
+      <label class="session-field" id="sessionLabelField">
+        <span class="session-field-label">Ne çalıştın?</span>
+        <input class="session-input" id="sessionLabel" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Örn. AII302">
+      </label>
+
+      <p class="session-duration-preview" id="sessionDurationPreview">Süre: —</p>
+      <p class="session-error" id="sessionError" role="alert"></p>
+
+      <div class="session-dialog-actions">
+        <button class="btn btn-reset session-delete-btn" id="sessionDialogDelete" type="button" hidden>Sil</button>
+        <button class="btn btn-reset" id="sessionDialogCancel" type="button">Vazgeç</button>
+        <button class="btn btn-start" id="sessionDialogSave" type="submit">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
   <div class="toast" id="toast" hidden>
     <span class="toast-msg" id="toastMsg">Kayıt silindi</span>
     <button class="toast-undo" id="toastUndo" type="button">Geri Al</button>
@@ -183,6 +227,6 @@
   <audio id="ambientAudio" loop preload="none" playsinline webkit-playsinline></audio>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="script.js?v=20261107"></script>
+  <script src="script.js?v=20261107b"></script>
 </body>
 </html>

@@ -65,7 +65,22 @@
     chartCanvas: document.getElementById('periodChart'),
     chartLegend: document.getElementById('chartLegend'),
     libraryShelf: document.getElementById('libraryShelf'),
-    libraryCount: document.getElementById('libraryCount')
+    libraryCount: document.getElementById('libraryCount'),
+    btnAddSession: document.getElementById('btnAddSession'),
+    sessionDialog: document.getElementById('sessionDialog'),
+    sessionForm: document.getElementById('sessionForm'),
+    sessionDialogTitle: document.getElementById('sessionDialogTitle'),
+    sessionTypeStudy: document.getElementById('sessionTypeStudy'),
+    sessionTypeBreak: document.getElementById('sessionTypeBreak'),
+    sessionDate: document.getElementById('sessionDate'),
+    sessionStart: document.getElementById('sessionStart'),
+    sessionEnd: document.getElementById('sessionEnd'),
+    sessionLabelField: document.getElementById('sessionLabelField'),
+    sessionLabel: document.getElementById('sessionLabel'),
+    sessionDurationPreview: document.getElementById('sessionDurationPreview'),
+    sessionError: document.getElementById('sessionError'),
+    sessionDialogDelete: document.getElementById('sessionDialogDelete'),
+    sessionDialogCancel: document.getElementById('sessionDialogCancel')
   };
 
   let chart = null;
@@ -388,14 +403,34 @@
     return box;
   }
 
-  function createLibrarySessionTile(session) {
+  function createSessionEditButton(onClick) {
+    const btn = document.createElement('button');
+    btn.className = 'session-edit';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Kaydı düzenle');
+    btn.title = 'Düzenle';
+    btn.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13.5 8.5l2 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    btn.addEventListener('click', onClick);
+    return btn;
+  }
+
+  function createLibrarySessionTile(session, dateKey) {
     const meta = formatSessionMeta(session);
     const tile = document.createElement('div');
     tile.className = 'library-session-tile' + (isBreakSession(session) ? ' is-break' : '');
 
+    const timeRow = document.createElement('div');
+    timeRow.className = 'library-tile-head';
+
     const timeEl = document.createElement('span');
     timeEl.className = 'library-tile-time';
     timeEl.textContent = `${session.startTime} – ${session.endTime}`;
+
+    timeRow.append(
+      timeEl,
+      createSessionEditButton(() => openSessionDialog({ dateKey, sessionId: session.id }))
+    );
 
     const metaEl = document.createElement('div');
     metaEl.className = 'library-tile-meta';
@@ -412,7 +447,7 @@
     durationEl.textContent = meta.duration;
     metaEl.appendChild(durationEl);
 
-    tile.append(timeEl, metaEl);
+    tile.append(timeRow, metaEl);
     return tile;
   }
 
@@ -432,14 +467,22 @@
     return tile;
   }
 
-  function createLibrarySection(title, emptyText, tiles, createTile) {
+  function createLibrarySection(title, emptyText, tiles, createTile, action) {
     const section = document.createElement('section');
     section.className = 'library-card-section';
 
     const titleEl = document.createElement('h3');
     titleEl.className = 'library-section-title';
     titleEl.textContent = title;
-    section.appendChild(titleEl);
+
+    if (action) {
+      const head = document.createElement('div');
+      head.className = 'library-section-head';
+      head.append(titleEl, action);
+      section.appendChild(head);
+    } else {
+      section.appendChild(titleEl);
+    }
 
     if (!tiles.length) {
       const empty = document.createElement('p');
@@ -980,6 +1023,10 @@
 
     if (undoBuffer.type === 'archiveDay') {
       historyArchive[undoBuffer.dateKey] = undoBuffer.day;
+    } else if (undoBuffer.type === 'archiveSession') {
+      const day = historyArchive[undoBuffer.dateKey] ||
+        (historyArchive[undoBuffer.dateKey] = { sessions: [], goals: readGoalsFromStorage(undoBuffer.dateKey) });
+      day.sessions.splice(undoBuffer.index, 0, undoBuffer.session);
     } else {
       state.sessions.splice(undoBuffer.index, 0, undoBuffer.session);
     }
@@ -1008,6 +1055,182 @@
     renderChart();
     renderLibrary();
     showUndoToast('Gün arşivden silindi');
+  }
+
+  let sessionDialogContext = null;
+
+  function timeToMinutes(value) {
+    const [h, m] = String(value || '').split(':').map(Number);
+    if (!Number.isFinite(h) || !Number.isFinite(m)) return NaN;
+    return h * 60 + m;
+  }
+
+  function getDurationFromTimes(startTime, endTime) {
+    const start = timeToMinutes(startTime);
+    const end = timeToMinutes(endTime);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start === end) return NaN;
+    return end > start ? end - start : end + 24 * 60 - start;
+  }
+
+  function getSessionsForDate(dateKey) {
+    if (dateKey === state.date) return state.sessions;
+    return historyArchive[dateKey]?.sessions || [];
+  }
+
+  function sortSessionsByStart(sessions) {
+    sessions.sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
+  }
+
+  function createLibraryAddButton(dateKey) {
+    const btn = document.createElement('button');
+    btn.className = 'library-section-add';
+    btn.type = 'button';
+    btn.textContent = '+ Ekle';
+    btn.setAttribute('aria-label', `${formatDateKeyLabel(dateKey)} gününe kayıt ekle`);
+    btn.addEventListener('click', () => openSessionDialog({ dateKey }));
+    return btn;
+  }
+
+  function setSessionDialogType(type) {
+    if (!sessionDialogContext) return;
+    sessionDialogContext.type = type;
+    const isBreak = type === 'break';
+    els.sessionTypeStudy.classList.toggle('is-active', !isBreak);
+    els.sessionTypeBreak.classList.toggle('is-active', isBreak);
+    els.sessionTypeStudy.setAttribute('aria-pressed', isBreak ? 'false' : 'true');
+    els.sessionTypeBreak.setAttribute('aria-pressed', isBreak ? 'true' : 'false');
+    els.sessionLabelField.hidden = isBreak;
+  }
+
+  function updateSessionDurationPreview() {
+    const minutes = getDurationFromTimes(els.sessionStart.value, els.sessionEnd.value);
+    els.sessionDurationPreview.textContent = Number.isFinite(minutes)
+      ? `Süre: ${formatWeeklyMinutesLabel(minutes)}`
+      : 'Süre: —';
+  }
+
+  function openSessionDialog({ dateKey, sessionId = null }) {
+    const session = sessionId
+      ? getSessionsForDate(dateKey).find(item => item.id === sessionId)
+      : null;
+    if (sessionId && !session) return;
+
+    sessionDialogContext = { dateKey, sessionId, type: 'study' };
+    const editing = Boolean(session);
+
+    els.sessionDialogTitle.textContent = editing ? 'Kaydı düzenle' : 'Yeni kayıt';
+    els.sessionDate.value = dateKey;
+    els.sessionDate.max = getTodayKey();
+    els.sessionDate.disabled = editing;
+    setSessionDialogType(session && isBreakSession(session) ? 'break' : 'study');
+
+    if (session) {
+      els.sessionStart.value = session.startTime;
+      els.sessionEnd.value = session.endTime;
+      els.sessionLabel.value = session.label || '';
+    } else if (dateKey === getTodayKey()) {
+      const now = new Date();
+      els.sessionEnd.value = formatClock(now);
+      els.sessionStart.value = formatClock(new Date(now.getTime() - 60 * 60000));
+      els.sessionLabel.value = '';
+    } else {
+      els.sessionStart.value = '09:00';
+      els.sessionEnd.value = '10:00';
+      els.sessionLabel.value = '';
+    }
+
+    els.sessionDialogDelete.hidden = !editing;
+    els.sessionError.textContent = '';
+    updateSessionDurationPreview();
+    els.sessionDialog.showModal();
+    els.sessionStart.focus();
+  }
+
+  function closeSessionDialog() {
+    sessionDialogContext = null;
+    if (els.sessionDialog.open) els.sessionDialog.close();
+  }
+
+  function addSessionToDate(dateKey, session) {
+    if (dateKey === state.date) {
+      state.sessions.push(session);
+      sortSessionsByStart(state.sessions);
+      return;
+    }
+
+    const day = historyArchive[dateKey];
+    if (day) {
+      if (!Array.isArray(day.sessions)) day.sessions = [];
+      day.sessions.push(session);
+      sortSessionsByStart(day.sessions);
+    } else {
+      historyArchive[dateKey] = { sessions: [session], goals: readGoalsFromStorage(dateKey) };
+    }
+  }
+
+  function handleSessionFormSubmit(event) {
+    event.preventDefault();
+    if (!sessionDialogContext) return;
+
+    const { sessionId, type } = sessionDialogContext;
+    const dateKey = sessionId ? sessionDialogContext.dateKey : els.sessionDate.value;
+    const startTime = els.sessionStart.value;
+    const endTime = els.sessionEnd.value;
+    const showError = message => { els.sessionError.textContent = message; };
+
+    if (!dateKey) return showError('Bir tarih seç.');
+    if (dateKey > getTodayKey()) return showError('Gelecek bir tarihe kayıt eklenemez.');
+    if (!startTime || !endTime) return showError('Başlangıç ve bitiş saatini gir.');
+
+    const durationMinutes = getDurationFromTimes(startTime, endTime);
+    if (!Number.isFinite(durationMinutes)) return showError('Başlangıç ve bitiş saati aynı olamaz.');
+
+    const isBreak = type === 'break';
+    const label = isBreak ? '' : els.sessionLabel.value.trim();
+    const target = sessionId
+      ? getSessionsForDate(dateKey).find(item => item.id === sessionId)
+      : { id: createSessionId() };
+    if (!target) return closeSessionDialog();
+
+    target.startTime = startTime;
+    target.endTime = endTime;
+    target.durationMinutes = durationMinutes;
+    if (isBreak) target.type = 'break'; else delete target.type;
+    if (label) target.label = label; else delete target.label;
+
+    if (sessionId) {
+      sortSessionsByStart(getSessionsForDate(dateKey));
+    } else {
+      addSessionToDate(dateKey, target);
+    }
+
+    closeSessionDialog();
+    saveState();
+    renderAll();
+    showUndoToast(sessionId ? 'Kayıt güncellendi' : 'Kayıt eklendi');
+    undoBuffer = null;
+  }
+
+  function handleSessionDialogDelete() {
+    if (!sessionDialogContext?.sessionId) return;
+    const { dateKey, sessionId } = sessionDialogContext;
+    closeSessionDialog();
+
+    if (dateKey === state.date) {
+      deleteSession(sessionId);
+      return;
+    }
+
+    const day = historyArchive[dateKey];
+    const index = day?.sessions ? day.sessions.findIndex(item => item.id === sessionId) : -1;
+    if (index === -1) return;
+
+    undoBuffer = { type: 'archiveSession', dateKey, index, session: { ...day.sessions[index] } };
+    day.sessions.splice(index, 1);
+    saveState();
+    renderChart();
+    renderLibrary();
+    showUndoToast('Kayıt silindi');
   }
 
   function buildSessionMetaElements(session, meta) {
@@ -1067,6 +1290,8 @@
 
       body.append(timeEl, metaEl);
 
+      const editBtn = createSessionEditButton(() => openSessionDialog({ dateKey: state.date, sessionId: session.id }));
+
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'session-delete';
       deleteBtn.type = 'button';
@@ -1074,7 +1299,7 @@
       deleteBtn.textContent = '×';
       deleteBtn.addEventListener('click', () => deleteSession(session.id, li));
 
-      li.append(body, deleteBtn);
+      li.append(body, editBtn, deleteBtn);
       els.sessionList.appendChild(li);
     });
   }
@@ -1159,7 +1384,8 @@
           'Çalışma Kayıtları',
           'Bu gün için çalışma kaydı yok.',
           [...sessions].reverse(),
-          createLibrarySessionTile
+          session => createLibrarySessionTile(session, dateKey),
+          createLibraryAddButton(dateKey)
         ),
         createLibrarySection(
           'Günün Hedefleri',
@@ -1706,6 +1932,18 @@
   els.countdownMinutes.addEventListener('change', applyCountdownDurationInput);
   els.btnBreakStart.addEventListener('click', handleBreakToggle);
   els.toastUndo.addEventListener('click', undoDelete);
+  els.btnAddSession.addEventListener('click', () => openSessionDialog({ dateKey: state.date }));
+  els.sessionForm.addEventListener('submit', handleSessionFormSubmit);
+  els.sessionDialogCancel.addEventListener('click', closeSessionDialog);
+  els.sessionDialogDelete.addEventListener('click', handleSessionDialogDelete);
+  els.sessionDialog.addEventListener('close', () => { sessionDialogContext = null; });
+  els.sessionDialog.addEventListener('click', (event) => {
+    if (event.target === els.sessionDialog) closeSessionDialog();
+  });
+  els.sessionTypeStudy.addEventListener('click', () => setSessionDialogType('study'));
+  els.sessionTypeBreak.addEventListener('click', () => setSessionDialogType('break'));
+  els.sessionStart.addEventListener('input', updateSessionDurationPreview);
+  els.sessionEnd.addEventListener('input', updateSessionDurationPreview);
 
   const archiveJumpBtn = document.getElementById('btnArchiveJump');
   const libraryPanel = document.getElementById('libraryPanel');
