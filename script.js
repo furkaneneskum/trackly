@@ -1789,9 +1789,47 @@
     if (changed) saveState();
   }
 
+  /** Bir seferlik kayıt düzeltmeleri (tarayıcı başına bir kez uygulanır). */
+  const ONE_TIME_SESSION_FIXES = [
+    {
+      flag: 'studyTracker_fix_sat_20261107_break_to_aii302_v1',
+      dateKey: '2026-11-07',
+      startTime: '02:16',
+      endTime: '03:29',
+      label: 'AII302'
+    }
+  ];
+
+  function applyOneTimeSessionFixes() {
+    let changed = false;
+
+    ONE_TIME_SESSION_FIXES.forEach(({ flag, dateKey, startTime, endTime, label }) => {
+      if (storage.get(flag)) return;
+
+      const sessions = state.date === dateKey
+        ? state.sessions
+        : historyArchive[dateKey]?.sessions;
+      const target = Array.isArray(sessions)
+        ? sessions.find(s => isBreakSession(s) && s.startTime === startTime && s.endTime === endTime)
+        : null;
+
+      if (target) {
+        delete target.type;
+        target.label = label;
+        changed = true;
+        storage.set(flag, '1');
+      } else if (dateKey < getTodayKey()) {
+        storage.set(flag, '1');
+      }
+    });
+
+    if (changed) saveState();
+  }
+
   loadSettings();
   loadState();
   applyOneTimeManualSessionImport();
+  applyOneTimeSessionFixes();
   repairCountdownState();
   syncTimerModeUi();
   renderAll();
