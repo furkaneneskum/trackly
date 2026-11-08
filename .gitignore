@@ -9,3 +9,7 @@ desktop.ini
 # Editör
 .vscode/
 .idea/
+
+# Masaüstü uygulaması (Electron) derleme çıktıları
+node_modules/
+dist/

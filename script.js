@@ -1945,6 +1945,52 @@
   els.sessionStart.addEventListener('input', updateSessionDurationPreview);
   els.sessionEnd.addEventListener('input', updateSessionDurationPreview);
 
+  const BACKUP_KEY_PREFIXES = ['studyTracker', 'calismaTakipcisi'];
+
+  function collectBackupData() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && BACKUP_KEY_PREFIXES.some(prefix => key.startsWith(prefix))) {
+        data[key] = localStorage.getItem(key);
+      }
+    }
+    return data;
+  }
+
+  function exportBackup() {
+    saveState();
+    const payload = {
+      app: 'trackly',
+      format: 1,
+      exportedAt: new Date().toISOString(),
+      source: window.tracklyDesktop ? 'desktop' : location.href,
+      data: collectBackupData()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `trackly-yedek-${getTodayKey()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showUndoToast('Yedek dosyası indirildi');
+    undoBuffer = null;
+  }
+
+  document.getElementById('btnExportData').addEventListener('click', exportBackup);
+
+  const importDataBtn = document.getElementById('btnImportData');
+  if (window.tracklyDesktop && typeof window.tracklyDesktop.importBackup === 'function') {
+    importDataBtn.hidden = false;
+    importDataBtn.addEventListener('click', () => {
+      saveState();
+      window.tracklyDesktop.importBackup();
+    });
+  }
+
   const archiveJumpBtn = document.getElementById('btnArchiveJump');
   const libraryPanel = document.getElementById('libraryPanel');
   if (archiveJumpBtn && libraryPanel) {
