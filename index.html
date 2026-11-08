@@ -10,8 +10,10 @@
   <meta name="description" content="Trackly — a minimal focus and study tracker with stopwatch, countdown, breaks, weekly goals and progress charts.">
   <meta name="apple-mobile-web-app-title" content="Trackly">
   <title>Trackly — Focus & Study Tracker</title>
-  <link rel="stylesheet" href="vendor/inter/inter.css">
-  <link rel="stylesheet" href="style.css?v=20261108">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261107b">
 </head>
 <body>
   <div class="app">
@@ -133,11 +135,7 @@
           <h2 class="panel-title library-title">Arşiv Kütüphanesi</h2>
           <p class="library-subtitle">Dün ve önceki günlerin çalışma kayıtları ve hedefleri</p>
         </div>
-        <div class="panel-header-actions">
-          <span class="library-count" id="libraryCount" hidden></span>
-          <button class="panel-action-btn" id="btnImportData" type="button" title="Web sürümünden alınan yedeği içe aktar" hidden>İçe aktar</button>
-          <button class="panel-action-btn" id="btnExportData" type="button" title="Tüm verileri JSON dosyası olarak indir">Dışa aktar</button>
-        </div>
+        <span class="library-count" id="libraryCount" hidden></span>
       </div>
       <div class="library-shelf" id="libraryShelf">
         <p class="library-empty">Henüz arşivlenmiş gün yok. Bugün kayıt veya hedef oluştur — yarın burada görünecek.</p>
@@ -228,7 +226,7 @@
 
   <audio id="ambientAudio" loop preload="none" playsinline webkit-playsinline></audio>
 
-  <script src="vendor/chart.umd.js"></script>
-  <script src="script.js?v=20261108"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="script.js?v=20261107b"></script>
 </body>
 </html>
