@@ -2064,10 +2064,66 @@
     if (changed) saveState();
   }
 
+  /** Bir seferlik: 12 Kasım'da silinen arşivden bilinen kayıtların geri yüklenmesi. */
+  const ARCHIVE_RESTORE_FLAG = 'studyTracker_restore_20261114_v1';
+  const UNKNOWN_TIME_LABEL = 'Toplam · saat bilinmiyor';
+  const ARCHIVE_RESTORE_SESSIONS = {
+    '2026-11-03': [
+      { id: 'restore-1103-total', startTime: '00:00', endTime: '02:13', durationMinutes: 133, label: UNKNOWN_TIME_LABEL }
+    ],
+    '2026-11-04': [
+      { id: 'restore-1104-total', startTime: '00:00', endTime: '01:39', durationMinutes: 99, label: UNKNOWN_TIME_LABEL }
+    ],
+    '2026-11-05': [
+      { id: 'restore-1105-1450', startTime: '14:50', endTime: '15:40', durationMinutes: 50, label: 'diferansiyel' },
+      { id: 'restore-1105-2300', startTime: '23:00', endTime: '00:00', durationMinutes: 60, label: 'AII427' }
+    ],
+    '2026-11-06': [
+      { id: 'restore-1106-total', startTime: '00:00', endTime: '02:35', durationMinutes: 155, label: UNKNOWN_TIME_LABEL },
+      { id: 'restore-1106-2103', startTime: '21:03', endTime: '21:17', durationMinutes: 14, label: '302' },
+      { id: 'restore-1106-2149', startTime: '21:49', endTime: '21:59', durationMinutes: 9, label: '302' },
+      { id: 'restore-1106-2226', startTime: '22:26', endTime: '22:52', durationMinutes: 26, label: '427' }
+    ],
+    '2026-11-07': [
+      { id: 'restore-1107-0216', startTime: '02:16', endTime: '03:29', durationMinutes: 73, label: 'AII302' },
+      { id: 'restore-1107-0329', type: 'break', startTime: '03:29', endTime: '06:26', durationMinutes: 177 },
+      { id: 'restore-1107-0630', startTime: '06:30', endTime: '08:30', durationMinutes: 120, label: 'AII302 AND 427' }
+    ]
+  };
+
+  function applyOneTimeArchiveRestore() {
+    if (storage.get(ARCHIVE_RESTORE_FLAG)) return;
+
+    Object.entries(ARCHIVE_RESTORE_SESSIONS).forEach(([dateKey, restored]) => {
+      if (dateKey >= getTodayKey()) return;
+
+      const day = historyArchive[dateKey] ||
+        (historyArchive[dateKey] = { sessions: [], goals: readGoalsFromStorage(dateKey) });
+      if (!Array.isArray(day.sessions)) day.sessions = [];
+
+      restored.forEach(session => {
+        const existing = day.sessions.find(item =>
+          item.startTime === session.startTime && isBreakSession(item) === isBreakSession(session)
+        );
+        if (existing) {
+          if (session.label && !existing.label) existing.label = session.label;
+        } else {
+          day.sessions.push({ ...session });
+        }
+      });
+
+      sortSessionsByStart(day.sessions);
+    });
+
+    storage.set(ARCHIVE_RESTORE_FLAG, '1');
+    saveState();
+  }
+
   loadSettings();
   loadState();
   applyOneTimeManualSessionImport();
   applyOneTimeSessionFixes();
+  applyOneTimeArchiveRestore();
   repairCountdownState();
   syncTimerModeUi();
   renderAll();
