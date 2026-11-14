@@ -103,6 +103,7 @@
   };
 
   let saveInProgress = false;
+  let savingSuspended = false;
 
   function clampCountdownInputs() {
     const hours = Math.min(23, Math.max(0, Math.round(Number(els.countdownHours.value) || 0)));
@@ -771,6 +772,7 @@
   }
 
   function saveState() {
+    if (savingSuspended) return;
     const active = {
       startTime: state.active.startTime,
       elapsedMs: state.active.elapsedMs,
@@ -1944,6 +1946,131 @@
   els.sessionTypeBreak.addEventListener('click', () => setSessionDialogType('break'));
   els.sessionStart.addEventListener('input', updateSessionDurationPreview);
   els.sessionEnd.addEventListener('input', updateSessionDurationPreview);
+
+  const BACKUP_KEY_PREFIXES = ['studyTracker', 'calismaTakipcisi'];
+
+  function isBackupKey(key) {
+    return typeof key === 'string' && BACKUP_KEY_PREFIXES.some(prefix => key.startsWith(prefix));
+  }
+
+  function collectBackupData() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (isBackupKey(key)) data[key] = localStorage.getItem(key);
+    }
+    return data;
+  }
+
+  function downloadBackup(fileName) {
+    const payload = {
+      app: 'trackly',
+      format: 1,
+      exportedAt: new Date().toISOString(),
+      source: location.href,
+      data: collectBackupData()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportBackup() {
+    saveState();
+    downloadBackup(`trackly-yedek-${getTodayKey()}.json`);
+    showUndoToast('Yedek dosyası indirildi');
+    undoBuffer = null;
+  }
+
+  function parseBackupText(text) {
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      throw new Error('Dosya okunamadı. Trackly\'nin "Dışa aktar" ile indirdiği .json dosyasını seç.');
+    }
+    if (!parsed || parsed.app !== 'trackly' || !parsed.data || typeof parsed.data !== 'object') {
+      throw new Error('Bu dosya bir Trackly yedeği değil.');
+    }
+
+    const data = {};
+    Object.entries(parsed.data).forEach(([key, value]) => {
+      if (isBackupKey(key) && typeof value === 'string') data[key] = value;
+    });
+    if (!data[STORAGE_KEY]) throw new Error('Yedekte çalışma verisi bulunamadı.');
+
+    let main = null;
+    try {
+      main = JSON.parse(data[STORAGE_KEY]);
+    } catch {
+      main = null;
+    }
+    if (!main || typeof main !== 'object' || !main.date) {
+      throw new Error('Yedekteki çalışma verisi bozuk görünüyor.');
+    }
+    const archiveDays = Object.keys(main.archive || {}).length;
+    return { data, archiveDays, exportedAt: parsed.exportedAt };
+  }
+
+  function restoreBackup(data) {
+    const previous = collectBackupData();
+    try {
+      Object.keys(previous).forEach(key => localStorage.removeItem(key));
+      Object.entries(data).forEach(([key, value]) => localStorage.setItem(key, value));
+    } catch (error) {
+      Object.keys(collectBackupData()).forEach(key => localStorage.removeItem(key));
+      Object.entries(previous).forEach(([key, value]) => localStorage.setItem(key, value));
+      throw error;
+    }
+  }
+
+  async function handleImportFile(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+
+    let backup;
+    try {
+      backup = parseBackupText(await file.text());
+    } catch (error) {
+      alert(`Yedek yüklenemedi.\n\n${error.message}\n\nMevcut verilerinde hiçbir değişiklik yapılmadı.`);
+      return;
+    }
+
+    const exportedAt = backup.exportedAt
+      ? new Date(backup.exportedAt).toLocaleString('tr-TR')
+      : 'bilinmiyor';
+    const confirmed = confirm(
+      `Bu yedek yüklensin mi?\n\nYedek tarihi: ${exportedAt}\nArşivdeki gün sayısı: ${backup.archiveDays}\n\n` +
+      'Şu anki verilerin bu yedekle değiştirilecek. Önce şu anki verilerinin bir yedeği otomatik olarak indirilecek.'
+    );
+    if (!confirmed) return;
+
+    saveState();
+    downloadBackup(`trackly-yedek-yuklemeden-once-${getTodayKey()}.json`);
+
+    try {
+      restoreBackup(backup.data);
+    } catch (error) {
+      alert(`Yedek yüklenemedi.\n\n${error.message}\n\nMevcut verilerin korundu.`);
+      return;
+    }
+
+    savingSuspended = true;
+    stopTicking();
+    setTimeout(() => location.reload(), 300);
+  }
+
+  document.getElementById('btnExportData').addEventListener('click', exportBackup);
+  const importDataInput = document.getElementById('importDataInput');
+  document.getElementById('btnImportData').addEventListener('click', () => importDataInput.click());
+  importDataInput.addEventListener('change', handleImportFile);
 
   const archiveJumpBtn = document.getElementById('btnArchiveJump');
   const libraryPanel = document.getElementById('libraryPanel');

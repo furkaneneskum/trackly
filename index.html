@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20261114">
+  <link rel="stylesheet" href="style.css?v=20261114b">
 </head>
 <body>
   <div class="app">
@@ -135,7 +135,12 @@
           <h2 class="panel-title library-title">Arşiv Kütüphanesi</h2>
           <p class="library-subtitle">Dün ve önceki günlerin çalışma kayıtları ve hedefleri</p>
         </div>
-        <span class="library-count" id="libraryCount" hidden></span>
+        <div class="panel-header-actions">
+          <span class="library-count" id="libraryCount" hidden></span>
+          <button class="panel-action-btn" id="btnImportData" type="button" title="Daha önce indirdiğin yedeği geri yükle">İçe aktar</button>
+          <button class="panel-action-btn" id="btnExportData" type="button" title="Tüm verilerini yedek dosyası olarak indir">Dışa aktar</button>
+          <input id="importDataInput" type="file" accept=".json,application/json" hidden>
+        </div>
       </div>
       <div class="library-shelf" id="libraryShelf">
         <p class="library-empty">Henüz arşivlenmiş gün yok. Bugün kayıt veya hedef oluştur — yarın burada görünecek.</p>
@@ -227,6 +232,6 @@
   <audio id="ambientAudio" loop preload="none" playsinline webkit-playsinline></audio>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="script.js?v=20261114"></script>
+  <script src="script.js?v=20261114b"></script>
 </body>
 </html>
